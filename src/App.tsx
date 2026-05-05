@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Heart, Sparkles, MessageCircle, ArrowDown } from 'lucide-react';
 import Confetti from './components/Confetti';
@@ -10,6 +10,14 @@ export default function App() {
   const [image, setImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Load saved image on mount
+  useEffect(() => {
+    const savedImage = localStorage.getItem('hanie_birthday_photo');
+    if (savedImage) {
+      setImage(savedImage);
+    }
+  }, []);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -24,7 +32,9 @@ export default function App() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result as string);
+        const base64String = reader.result as string;
+        setImage(base64String);
+        localStorage.setItem('hanie_birthday_photo', base64String);
       };
       reader.readAsDataURL(file);
     }
@@ -51,30 +61,42 @@ export default function App() {
         >
           <motion.div
             animate={{ 
-              y: [0, -10, 0],
+              y: [0, -12, 0],
             }}
             transition={{ 
-              duration: 4, 
+              duration: 5, 
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="mb-8 relative"
+            className="mb-10 relative"
           >
             {/* Image Placeholder / Upload */}
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="relative w-48 h-48 md:w-56 md:h-56 mx-auto rounded-full p-1 bg-gradient-to-tr from-luxury-gold via-luxury-rose to-luxury-pink glow-circle cursor-pointer group"
+              className="relative w-56 h-56 md:w-64 md:h-64 mx-auto cursor-pointer group"
             >
-              <div className="w-full h-full rounded-full bg-luxury-cream overflow-hidden flex items-center justify-center border-4 border-white">
-                {image ? (
-                  <img src={image} alt="Hanie" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                ) : (
-                  <div className="flex flex-col items-center text-luxury-rose/60 p-4">
-                    <Sparkles size={32} className="mb-2" />
-                    <span className="text-xs uppercase tracking-widest font-medium">Click to Add<br/>Her Photo</span>
-                  </div>
-                )}
+              {/* Decorative rings */}
+              <div className="absolute inset-[-8px] rounded-full border border-luxury-rose/20 animate-[spin_10s_linear_infinite]" />
+              <div className="absolute inset-[-15px] rounded-full border border-luxury-gold/10 animate-[spin_15s_linear_infinite_reverse]" />
+              
+              <div className="w-full h-full rounded-full bg-white shadow-2xl p-2 relative z-10 overflow-hidden transform transition-transform duration-500 group-hover:scale-105">
+                <div className="w-full h-full rounded-full bg-luxury-cream/50 overflow-hidden flex items-center justify-center border-4 border-luxury-pink/30 relative">
+                  {image ? (
+                    <img src={image} alt="Hanie" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                  ) : (
+                    <div className="flex flex-col items-center text-luxury-rose/40 px-6 text-center">
+                      <div className="bg-luxury-pink/30 p-5 rounded-full mb-3 group-hover:scale-110 transition-transform duration-500">
+                        <Heart size={48} className="fill-luxury-rose/10" />
+                      </div>
+                      <span className="text-[9px] uppercase tracking-[0.3em] font-serif font-black text-luxury-rose/60">Click to place<br/>Hanie's Photo</span>
+                    </div>
+                  )}
+                  
+                  {/* Inner Glow/Shadow overlay */}
+                  <div className="absolute inset-0 rounded-full shadow-[inset_0_0_50px_rgba(229,168,168,0.3)] pointer-events-none" />
+                </div>
               </div>
+              
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -83,13 +105,29 @@ export default function App() {
                 accept="image/*" 
               />
               
-              {/* Decorative Floating Sparkles */}
+              {/* Floating Embellishments */}
               <motion.div 
-                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-4 -right-4 text-luxury-gold"
+                animate={{ 
+                  scale: [1, 1.2, 1], 
+                  opacity: [0.5, 0.8, 0.5],
+                  y: [0, -10, 0]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute -top-4 -right-2 text-luxury-gold z-20"
               >
-                <Sparkles size={24} />
+                <Sparkles size={32} />
+              </motion.div>
+              
+              <motion.div 
+                animate={{ 
+                  scale: [1, 1.3, 1], 
+                  opacity: [0.4, 0.7, 0.4],
+                  rotate: [0, 15, 0]
+                }}
+                transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+                className="absolute bottom-2 -left-6 text-luxury-rose z-20"
+              >
+                <Heart size={24} fill="currentColor" />
               </motion.div>
             </div>
           </motion.div>
